@@ -36,7 +36,6 @@ class Portefeuille:
         else:
             print("Solde insuffisant pour effectuer le virement.")
 
-# Fonction pour exécuter des commandes depuis la console
 def executer_commandes():
     portefeuille = Portefeuille()
 
@@ -63,6 +62,5 @@ def executer_commandes():
         else:
             print("Commande invalide. Veuillez réessayer.")
 
-# Exécutez la fonction pour démarrer le programme interactif
 executer_commandes()
 
