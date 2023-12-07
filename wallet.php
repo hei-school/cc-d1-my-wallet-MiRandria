@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 class Portefeuille {
     private $solde;
@@ -52,8 +53,7 @@ class Portefeuille {
 }
 
 function executerCommandes() {
-    $soldeInitial = isset($_POST["soldeInitial"]) ? floatval($_POST["soldeInitial"]) : 0;
-    $portefeuille = new Portefeuille($soldeInitial);
+    $portefeuille = isset($_SESSION['portefeuille']) ? $_SESSION['portefeuille'] : new Portefeuille();
 
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $commande = isset($_POST["commande"]) ? strtolower(trim($_POST["commande"])) : "";
@@ -63,11 +63,14 @@ function executerCommandes() {
                 $portefeuille->afficherSolde();
                 break;
             case "depot":
+                $soldeInitial = isset($_POST["soldeInitial"]) ? floatval($_POST["soldeInitial"]) : 0;
                 $montantDepot = isset($_POST["montantDepot"]) ? floatval($_POST["montantDepot"]) : 0;
-                if ($montantDepot > 0) {
+                
+                if ($soldeInitial >= 0 && $montantDepot > 0) {
+                    $portefeuille = new Portefeuille($soldeInitial);
                     $portefeuille->deposer($montantDepot);
                 } else {
-                    echo "Veuillez entrer un montant de dépôt valide.\n";
+                    echo "Veuillez entrer un solde initial valide et un montant de dépôt positif.\n";
                 }
                 break;
             case "retrait":
@@ -88,8 +91,10 @@ function executerCommandes() {
             default:
                 echo "Commande invalide. Veuillez réessayer.\n";
         }
+        $_SESSION['portefeuille'] = $portefeuille;
     }
 }
+
 executerCommandes();
 ?>
 
