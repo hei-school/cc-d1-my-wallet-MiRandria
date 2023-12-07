@@ -46,7 +46,6 @@ class Portefeuille
     end
   end
   
-  # Fonction pour exécuter des commandes depuis la console
   def executer_commandes
     portefeuille = Portefeuille.new
   
@@ -81,6 +80,5 @@ class Portefeuille
     end
   end
   
-  # Exécutez la fonction pour démarrer le programme interactif
   executer_commandes
   
