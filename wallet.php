@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 class Portefeuille {
     private $solde;
@@ -16,16 +15,16 @@ class Portefeuille {
 
     public function deposer($montant) {
         $this->solde += $montant;
-        $this->historiqueTransactions[] = "Dépôt de $montant euros";
-        echo "Dépôt de $montant euros effectué avec succès.\n";
+        $this->historiqueTransactions[] = "Dépôt de {$montant} euros";
+        echo "Dépôt de {$montant} euros effectué avec succès.\n";
         $this->afficherSolde();
     }
 
     public function retirer($montant) {
         if ($montant <= $this->solde) {
             $this->solde -= $montant;
-            $this->historiqueTransactions[] = "Retrait de $montant euros";
-            echo "Retrait de $montant euros effectué avec succès.\n";
+            $this->historiqueTransactions[] = "Retrait de {$montant} euros";
+            echo "Retrait de {$montant} euros effectué avec succès.\n";
             $this->afficherSolde();
         } else {
             echo "Solde insuffisant pour effectuer le retrait.\n";
@@ -43,8 +42,8 @@ class Portefeuille {
         if ($montant <= $this->solde) {
             $this->solde -= $montant;
             $destinataire->deposer($montant);
-            $this->historiqueTransactions[] = "Virement de $montant euros vers " . get_class($destinataire);
-            echo "Virement de $montant euros vers " . get_class($destinataire) . " effectué avec succès.\n";
+            $this->historiqueTransactions[] = "Virement de {$montant} euros vers " . get_class($destinataire);
+            echo "Virement de {$montant} euros vers " . get_class($destinataire) . " effectué avec succès.\n";
             $this->afficherSolde();
         } else {
             echo "Solde insuffisant pour effectuer le virement.\n";
@@ -52,34 +51,28 @@ class Portefeuille {
     }
 }
 
+// Fonction pour exécuter des commandes depuis la console
 function executerCommandes() {
-    $portefeuille = isset($_SESSION['portefeuille']) ? $_SESSION['portefeuille'] : new Portefeuille();
+    $portefeuille = new Portefeuille();
 
-    if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        $commande = isset($_POST["commande"]) ? strtolower(trim($_POST["commande"])) : "";
+    while (true) {
+        $commande = readline("Entrez une commande (solde, depot, retrait, virement, historique, quitter): ");
 
         switch ($commande) {
             case "solde":
                 $portefeuille->afficherSolde();
                 break;
             case "depot":
-                $soldeInitial = isset($_POST["soldeInitial"]) ? floatval($_POST["soldeInitial"]) : 0;
-                $montantDepot = isset($_POST["montantDepot"]) ? floatval($_POST["montantDepot"]) : 0;
-                
-                if ($soldeInitial >= 0 && $montantDepot > 0) {
-                    $portefeuille = new Portefeuille($soldeInitial);
-                    $portefeuille->deposer($montantDepot);
-                } else {
-                    echo "Veuillez entrer un solde initial valide et un montant de dépôt positif.\n";
-                }
+                $montantDepot = (float)readline("Entrez le montant du dépôt : ");
+                $portefeuille->deposer($montantDepot);
                 break;
             case "retrait":
-                $montantRetrait = isset($_POST["montantRetrait"]) ? floatval($_POST["montantRetrait"]) : 0;
+                $montantRetrait = (float)readline("Entrez le montant du retrait : ");
                 $portefeuille->retirer($montantRetrait);
                 break;
             case "virement":
                 $destinataire = new Portefeuille();
-                $montantVirement = isset($_POST["montantVirement"]) ? floatval($_POST["montantVirement"]) : 0;
+                $montantVirement = (float)readline("Entrez le montant du virement : ");
                 $portefeuille->effectuerVirement($destinataire, $montantVirement);
                 break;
             case "historique":
@@ -87,48 +80,13 @@ function executerCommandes() {
                 break;
             case "quitter":
                 echo "Fermeture du programme.\n";
-                exit;
+                return;
             default:
                 echo "Commande invalide. Veuillez réessayer.\n";
         }
-        $_SESSION['portefeuille'] = $portefeuille;
     }
 }
 
 executerCommandes();
+
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portefeuille</title>
-</head>
-<body>
-    <h1>Portefeuille</h1>
-    <form method="post" action="">
-        <label for="commande">Entrez une commande (solde, depot, retrait, virement, historique, quitter): </label>
-        <input type="text" name="commande" id="commande">
-        <br>
-
-        <label for="soldeInitial">Solde initial :</label>
-        <input type="text" name="soldeInitial" id="soldeInitial">
-        <br>
-
-        <label for="montantDepot">Montant du dépôt :</label>
-        <input type="text" name="montantDepot" id="montantDepot">
-        <br>
-
-        <label for="montantRetrait">Montant du retrait :</label>
-        <input type="text" name="montantRetrait" id="montantRetrait">
-        <br>
-
-        <label for="montantVirement">Montant du virement :</label>
-        <input type="text" name="montantVirement" id="montantVirement">
-        <br>
-
-        <button type="submit">Soumettre</button>
-    </form>
-</body>
-</html>
